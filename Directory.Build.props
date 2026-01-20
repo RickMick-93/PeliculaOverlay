@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <IntermediateOutputPath>C:\VS_Cache\StorageDrawer\obj\</IntermediateOutputPath>
+    <OutputPath>C:\VS_Cache\StorageDrawer\bin\</OutputPath>
+    <BaseIntermediateOutputPath>C:\VS_Cache\StorageDrawer\obj\</BaseIntermediateOutputPath>
+    <DotNetVsRoot>C:\VS_Cache\StorageDrawer\.vs\</DotNetVsRoot>
+  </PropertyGroup>
+</Project>
