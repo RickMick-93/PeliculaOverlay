@@ -6,13 +6,13 @@ namespace PeliculaOverlay // DEVE ser igual ao do OverlayManager
 {
     public class ForeignTextMonitor
     {
-        private Timer _mouseTimer;
+        private System.Windows.Forms.Timer _mouseTimer;
         private Point _lastMousePosition;
         private int _secondsIdle = 0;
 
         public ForeignTextMonitor()
         {
-            _mouseTimer = new Timer();
+            _mouseTimer = new System.Windows.Forms.Timer();
             _mouseTimer.Interval = 100;
             _mouseTimer.Tick += MouseTimer_Tick;
             _mouseTimer.Start();
@@ -24,24 +24,33 @@ namespace PeliculaOverlay // DEVE ser igual ao do OverlayManager
 
             if (currentPosition != _lastMousePosition)
             {
+                // Se moveu o mouse, reseta tudo e "limpa" a tela se necessário
                 _lastMousePosition = currentPosition;
                 _secondsIdle = 0;
             }
             else
             {
+                // Se está parado, aumenta o tempo
                 _secondsIdle += 100;
-            }
 
-            if (_secondsIdle == 1000)
-            {
-                IniciarCapturaDeTexto();
+                // Quando atingir EXATAMENTE 1 segundo
+                if (_secondsIdle == 1000)
+                {
+                    IniciarCapturaDeTexto();
+                }
+
+                // Opcional: Aqui poderíamos colocar uma regra para 
+                // re-verificar a cada 5 segundos se o mouse continuar parado
             }
         }
 
         private void IniciarCapturaDeTexto()
         {
-            // Apenas um aviso no console por enquanto
-            Console.WriteLine("🎯 Mouse parado: Gatilho de 1 segundo ativado.");
+            // Isso faz o aviso pular na tela
+            MessageBox.Show("🎯 O VisionGlass detectou que o mouse parou! O sensor está funcionando.", "Teste de Sensor");
+
+            // Zera o tempo para não repetir o aviso sem parar
+            _secondsIdle = 0;
         }
-    }
-}
+    } // Esta chave fecha a Classe
+} // Esta chave fecha o Namespace

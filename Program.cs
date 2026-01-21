@@ -12,26 +12,26 @@ namespace PeliculaOverlay
 
             try
             {
-                // --- PASSO 1: DETECTAR IDIOMA DO SISTEMA (SILENCIOSO) ---
-                // Inicializa o detector de idioma SILENCIOSAMENTE
+                // --- PASSO 1: DETECTAR IDIOMA DO SISTEMA ---
                 LanguageDetector.Initialize();
-
-                // Limpa logs antigos (mantém apenas últimos 7 dias)
                 LanguageDetector.CleanOldLogs();
 
-                // 1. INICIAR OVERLAY BASE (SILENCIOSO)
+                // --- PASSO 2: INICIAR O VIGIA DO MOUSE ---
+                // Adicionamos esta linha para o sensor começar a contar o tempo de repouso
+                var monitor = new ForeignTextMonitor();
+
+                // --- PASSO 3: INICIAR OVERLAY BASE ---
                 var overlay = new OverlayManager();
                 overlay.Start();
 
-                // 2. MANTER APLICAÇÃO RODANDO (SILENCIOSO)
+                // --- PASSO 4: MANTER APLICAÇÃO RODANDO ---
                 Application.Run();
 
-                // 3. LIMPEZA AO FECHAR (SILENCIOSO)
+                // --- PASSO 5: LIMPEZA AO FECHAR ---
                 overlay.Stop();
             }
             catch (Exception)
             {
-                // ERRO CRÍTICO - TAMBÉM SILENCIOSO
                 // O erro já está sendo logado no arquivo pelo LanguageDetector
             }
         }
