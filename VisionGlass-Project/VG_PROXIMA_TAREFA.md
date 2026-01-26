@@ -1,13 +1,13 @@
 PROXIMA-TAREFA - VISIONGLASS
 STATUS ATUAL: DOCUMENTACAO CONCLUIDA
-Regras (VG-RULES.md) OK.
+Regras (VG_RULES.md) OK.
 
-Projeto (VG-PROJECT.md) OK.
+Projeto (VG_MAPA_GERAL.md) OK.
 
-Conquistas (VG-RESUMO.md) OK.
+Conquistas (VG_ESTADO_ATUAL.md) OK.
 
 TAREFA IMEDIATA: PROGRAMACAO DO MONITOR DE TEXTO
-O objetivo agora e ajustar o arquivo "ForeignTextMonitor.cs" para seguir as novas regras de inteligencia.
+O objetivo agora e ajustar o arquivo "VG_Monitor_OCR.cs" para seguir as novas regras de inteligencia.
 
 PASSOS DA TAREFA:
 IMPLEMENTAR O GATILHO GLOBAL (PEDAL)
