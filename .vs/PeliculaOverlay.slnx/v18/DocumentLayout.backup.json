@@ -1,71 +1,12 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\rickm\\Meu Drive\\PeliculaOverlay\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{8E96CE8C-CD7C-F15B-38CA-CCFAAB81A8C8}|PeliculaOverlay.csproj|c:\\users\\rickm\\meu drive\\peliculaoverlay\\foreigntextmonitor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{8E96CE8C-CD7C-F15B-38CA-CCFAAB81A8C8}|PeliculaOverlay.csproj|solutionrelative:foreigntextmonitor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{8E96CE8C-CD7C-F15B-38CA-CCFAAB81A8C8}|PeliculaOverlay.csproj|c:\\users\\rickm\\meu drive\\peliculaoverlay\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{8E96CE8C-CD7C-F15B-38CA-CCFAAB81A8C8}|PeliculaOverlay.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{8E96CE8C-CD7C-F15B-38CA-CCFAAB81A8C8}|PeliculaOverlay.csproj|c:\\users\\rickm\\meu drive\\peliculaoverlay\\overlaymanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{8E96CE8C-CD7C-F15B-38CA-CCFAAB81A8C8}|PeliculaOverlay.csproj|solutionrelative:overlaymanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": [
-        {
-          "DockedWidth": 200,
-          "SelectedChildIndex": 2,
-          "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\rickm\\Meu Drive\\PeliculaOverlay\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\rickm\\Meu Drive\\PeliculaOverlay\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAABYAAAAAAAAAAAAAACYAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-20T23:42:15.659Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "OverlayManager.cs",
-              "DocumentMoniker": "C:\\Users\\rickm\\Meu Drive\\PeliculaOverlay\\OverlayManager.cs",
-              "RelativeDocumentMoniker": "OverlayManager.cs",
-              "ToolTip": "C:\\Users\\rickm\\Meu Drive\\PeliculaOverlay\\OverlayManager.cs",
-              "RelativeToolTip": "OverlayManager.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAmAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-20T23:36:37.464Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "ForeignTextMonitor.cs",
-              "DocumentMoniker": "C:\\Users\\rickm\\Meu Drive\\PeliculaOverlay\\ForeignTextMonitor.cs",
-              "RelativeDocumentMoniker": "ForeignTextMonitor.cs",
-              "ToolTip": "C:\\Users\\rickm\\Meu Drive\\PeliculaOverlay\\ForeignTextMonitor.cs",
-              "RelativeToolTip": "ForeignTextMonitor.cs",
-              "ViewState": "AgIAAC8AAAAAAAAAAAAUwDcAAAAhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-20T23:11:42.757Z",
-              "EditorCaption": ""
-            }
-          ]
-        }
-      ]
+      "DocumentGroups": []
     }
   ]
 }

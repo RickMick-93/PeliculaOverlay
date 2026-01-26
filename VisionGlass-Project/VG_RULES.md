@@ -19,3 +19,18 @@ Foco no Passivo: O sistema deve permanecer 100% silencioso e invisível, seguind
 
 Resumo da Jornada (Conquista de Documentação)
 Consolidação de Regras: Reunimos as instruções salvas com a experiência prática de hoje (limpeza do Drive) em um único conjunto de diretrizes.
+
+## 🛠️ Regras de Colaboração e Técnica (Adicionado em 25/01/2026)
+
+1. **Metodologia de Segurança (Um Passo por Vez):**
+   - O assistente deve analisar o problema e apresentar a solução teórica/lógica primeiro.
+   - Nenhuma implementação de código deve ser fornecida antes da confirmação do usuário.
+   - O desenvolvimento deve ser modular, esperando a conclusão de uma etapa antes de passar para a próxima.
+
+2. **Referência Técnica de Visão (OCR):**
+   - O projeto deve utilizar obrigatoriamente as bibliotecas nativas `Windows.Media.Ocr`.
+   - A compatibilidade mínima de destino deve ser mantida em Windows 10.0.19041.0.
+
+3. **Hierarquia de Tradução e Idioma:**
+   - A prioridade de tradução segue a ordem: 1º Dicionários Locais (.lang/.json) -> 2º Referência Oficial Microsoft.
+   - O sistema deve sempre validar o idioma do dispositivo antes de assumir qualquer tradução.
