@@ -5,16 +5,16 @@ using Timer = System.Windows.Forms.Timer;
 
 namespace PeliculaOverlay
 {
-    public class OverlayManager : IDisposable
+    public class VG_Gerenciador_Geral : IDisposable
     {
-        private TransparentWindow glassWindow;
-        private BorderWindow borderWindow;
-        private ForeignTextMonitor _textMonitor;
+        private VG_Interface_Pelicula glassWindow;
+        private VG_Interface_Borda borderWindow;
+        private VG_Monitor_OCR _textMonitor;
         private Timer zOrderTimer;
 
-        public OverlayManager()
+        public VG_Gerenciador_Geral()
         {
-            _textMonitor = new ForeignTextMonitor();
+            _textMonitor = new VG_Monitor_OCR();
             Console.WriteLine("📦 OverlayManager criado (modo tradutor)");
         }
 
@@ -26,13 +26,13 @@ namespace PeliculaOverlay
             {
                 // 1. JANELA PRINCIPAL TRANSPARENTE (VIDRO)
                 Console.WriteLine("   Criando janela vidro...");
-                glassWindow = new TransparentWindow();
+                glassWindow = new VG_Interface_Pelicula();
                 glassWindow.Show();
                 Console.WriteLine("   ✅ Vidro transparente ativo (alpha=15)");
 
                 // 2. JANELA DE BORDAS VISUAIS
                 Console.WriteLine("   Criando bordas visuais...");
-                borderWindow = new BorderWindow();
+                borderWindow = new VG_Interface_Borda();
                 borderWindow.Show();
 
                 // Sincronizar com o vidro
@@ -69,21 +69,21 @@ namespace PeliculaOverlay
                 // Garantir que ambas as janelas permaneçam sempre no topo
                 if (glassWindow != null && !glassWindow.IsDisposed)
                 {
-                    Win32API.SetWindowPos(
+                    VG_Sistema_Win32.SetWindowPos(
                         glassWindow.Handle,
-                        Win32API.HWND_TOPMOST,
+                        VG_Sistema_Win32.HWND_TOPMOST,
                         0, 0, 0, 0,
-                        Win32API.SWP_NOMOVE | Win32API.SWP_NOSIZE | Win32API.SWP_NOACTIVATE
+                        VG_Sistema_Win32.SWP_NOMOVE | VG_Sistema_Win32.SWP_NOSIZE | VG_Sistema_Win32.SWP_NOACTIVATE
                     );
                 }
 
                 if (borderWindow != null && !borderWindow.IsDisposed)
                 {
-                    Win32API.SetWindowPos(
+                    VG_Sistema_Win32.SetWindowPos(
                         borderWindow.Handle,
-                        Win32API.HWND_TOPMOST,
+                        VG_Sistema_Win32.HWND_TOPMOST,
                         0, 0, 0, 0,
-                        Win32API.SWP_NOMOVE | Win32API.SWP_NOSIZE | Win32API.SWP_NOACTIVATE
+                        VG_Sistema_Win32.SWP_NOMOVE | VG_Sistema_Win32.SWP_NOSIZE | VG_Sistema_Win32.SWP_NOACTIVATE
                     );
                 }
             }

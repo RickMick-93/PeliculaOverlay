@@ -12,7 +12,7 @@ namespace PeliculaOverlay
     /// - Sem controles de transparência
     /// - Base para futuras tarjas de tradução
     /// </summary>
-    public class TransparentWindow : Form
+    public class VG_Interface_Pelicula : Form
     {
         // Constantes fixas (não configuráveis)
         private const byte FIXED_ALPHA = 15;        // 6% visível
@@ -21,7 +21,7 @@ namespace PeliculaOverlay
         // Propriedade apenas para leitura (valor fixo)
         public int CurrentAlpha { get; } = FIXED_ALPHA;
 
-        public TransparentWindow()
+        public VG_Interface_Pelicula()
         {
             InitializeWindow();
         }
@@ -57,19 +57,19 @@ namespace PeliculaOverlay
                 CreateParams cp = base.CreateParams;
 
                 // WS_EX_LAYERED: Permite transparência alpha
-                cp.ExStyle |= Win32API.WS_EX_LAYERED;
+                cp.ExStyle |= VG_Sistema_Win32.WS_EX_LAYERED;
 
                 // WS_EX_TRANSPARENT: Cliques passam através da janela (ESSENCIAL)
-                cp.ExStyle |= Win32API.WS_EX_TRANSPARENT;
+                cp.ExStyle |= VG_Sistema_Win32.WS_EX_TRANSPARENT;
 
                 // WS_EX_TOPMOST: Sempre no topo da Z-order
-                cp.ExStyle |= Win32API.WS_EX_TOPMOST;
+                cp.ExStyle |= VG_Sistema_Win32.WS_EX_TOPMOST;
 
                 // WS_EX_TOOLWINDOW: Não aparece na taskbar/Alt+Tab
-                cp.ExStyle |= Win32API.WS_EX_TOOLWINDOW;
+                cp.ExStyle |= VG_Sistema_Win32.WS_EX_TOOLWINDOW;
 
                 // WS_EX_NOACTIVATE: Não recebe foco
-                cp.ExStyle |= Win32API.WS_EX_NOACTIVATE;
+                cp.ExStyle |= VG_Sistema_Win32.WS_EX_NOACTIVATE;
 
                 return cp;
             }
@@ -99,11 +99,11 @@ namespace PeliculaOverlay
             try
             {
                 // Aplica alpha fixo via Windows API
-                Win32API.SetLayeredWindowAttributes(
+                VG_Sistema_Win32.SetLayeredWindowAttributes(
                     this.Handle,
                     0,              // ColorKey (0 = não usamos)
                     FIXED_ALPHA,    // Alpha fixo: 15
-                    Win32API.LWA_ALPHA
+                    VG_Sistema_Win32.LWA_ALPHA
                 );
             }
             catch (Exception ex)
@@ -120,11 +120,11 @@ namespace PeliculaOverlay
         {
             try
             {
-                Win32API.SetWindowPos(
+                VG_Sistema_Win32.SetWindowPos(
                     this.Handle,
-                    (IntPtr)Win32API.HWND_TOPMOST,
+                    (IntPtr)VG_Sistema_Win32.HWND_TOPMOST,
                     0, 0, 0, 0,
-                    Win32API.SWP_NOMOVE | Win32API.SWP_NOSIZE | Win32API.SWP_NOACTIVATE
+                    VG_Sistema_Win32.SWP_NOMOVE | VG_Sistema_Win32.SWP_NOSIZE | VG_Sistema_Win32.SWP_NOACTIVATE
                 );
             }
             catch (Exception ex)

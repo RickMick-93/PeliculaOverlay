@@ -8,7 +8,7 @@ namespace PeliculaOverlay
     /// <summary>
     /// Detecta e gerencia o idioma do sistema para uso no VisionGlass
     /// </summary>
-    public static class LanguageDetector
+    public static class VG_Motor_Idiomas
     {
         private static string _userLanguage = string.Empty;
         private static readonly string _logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs", "visionglass.log");

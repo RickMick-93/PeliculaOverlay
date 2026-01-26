@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace PeliculaOverlay
 {
-    internal static class Program
+    internal static class VG_App_Entrada
     {
         [STAThread]
         static void Main()
@@ -13,15 +13,15 @@ namespace PeliculaOverlay
             try
             {
                 // --- PASSO 1: DETECTAR IDIOMA DO SISTEMA ---
-                LanguageDetector.Initialize();
-                LanguageDetector.CleanOldLogs();
+                VG_Motor_Idiomas.Initialize();
+                VG_Motor_Idiomas.CleanOldLogs();
 
                 // --- PASSO 2: INICIAR O VIGIA DO MOUSE ---
                 // Adicionamos esta linha para o sensor começar a contar o tempo de repouso
-                var monitor = new ForeignTextMonitor();
+                var monitor = new VG_Monitor_OCR();
 
                 // --- PASSO 3: INICIAR OVERLAY BASE ---
-                var overlay = new OverlayManager();
+                var overlay = new VG_Gerenciador_Geral();
                 overlay.Start();
 
                 // --- PASSO 4: MANTER APLICAÇÃO RODANDO ---

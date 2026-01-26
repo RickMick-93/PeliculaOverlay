@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace PeliculaOverlay
 {
-    public static class Win32API
+    public static class VG_Sistema_Win32
     {
         // Constantes da API Windows
         public const int WS_EX_TRANSPARENT = 0x00000020;

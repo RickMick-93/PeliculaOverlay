@@ -12,7 +12,7 @@ namespace PeliculaOverlay
     /// - Apenas visual - não interativa
     /// - Sincronizada com TransparentWindow
     /// </summary>
-    public class BorderWindow : Form
+    public class VG_Interface_Borda : Form
     {
         // Constantes fixas (não configuráveis)
         private const int BORDER_THICKNESS = 4;         // 4 pixels
@@ -22,7 +22,7 @@ namespace PeliculaOverlay
         // Magenta é a cor de transparência (área que será invisível)
         private static readonly Color TRANSPARENCY_COLOR = Color.Magenta;
 
-        public BorderWindow()
+        public VG_Interface_Borda()
         {
             InitializeWindow();
         }
@@ -58,11 +58,11 @@ namespace PeliculaOverlay
                 CreateParams cp = base.CreateParams;
 
                 // Mesmos estilos do TransparentWindow:
-                cp.ExStyle |= Win32API.WS_EX_LAYERED;      // Permite transparência
-                cp.ExStyle |= Win32API.WS_EX_TRANSPARENT;  // Cliques passam
-                cp.ExStyle |= Win32API.WS_EX_TOPMOST;      // Sempre no topo
-                cp.ExStyle |= Win32API.WS_EX_TOOLWINDOW;   // Não aparece na taskbar
-                cp.ExStyle |= Win32API.WS_EX_NOACTIVATE;   // Não recebe foco
+                cp.ExStyle |= VG_Sistema_Win32.WS_EX_LAYERED;      // Permite transparência
+                cp.ExStyle |= VG_Sistema_Win32.WS_EX_TRANSPARENT;  // Cliques passam
+                cp.ExStyle |= VG_Sistema_Win32.WS_EX_TOPMOST;      // Sempre no topo
+                cp.ExStyle |= VG_Sistema_Win32.WS_EX_TOOLWINDOW;   // Não aparece na taskbar
+                cp.ExStyle |= VG_Sistema_Win32.WS_EX_NOACTIVATE;   // Não recebe foco
 
                 return cp;
             }
@@ -97,11 +97,11 @@ namespace PeliculaOverlay
                 // Converter Color.Magenta para COLORREF (0x00FF00FF)
                 uint magentaColorRef = 0x00FF00FF;
 
-                Win32API.SetLayeredWindowAttributes(
+                VG_Sistema_Win32.SetLayeredWindowAttributes(
                     this.Handle,
                     magentaColorRef,     // Magenta será transparente
                     255,                 // Opacidade total (apenas a cor chave é transparente)
-                    Win32API.LWA_COLORKEY
+                    VG_Sistema_Win32.LWA_COLORKEY
                 );
             }
             catch (Exception ex)
@@ -156,11 +156,11 @@ namespace PeliculaOverlay
         {
             try
             {
-                Win32API.SetWindowPos(
+                VG_Sistema_Win32.SetWindowPos(
                     this.Handle,
-                    (IntPtr)Win32API.HWND_TOPMOST,
+                    (IntPtr)VG_Sistema_Win32.HWND_TOPMOST,
                     0, 0, 0, 0,
-                    Win32API.SWP_NOMOVE | Win32API.SWP_NOSIZE | Win32API.SWP_NOACTIVATE
+                    VG_Sistema_Win32.SWP_NOMOVE | VG_Sistema_Win32.SWP_NOSIZE | VG_Sistema_Win32.SWP_NOACTIVATE
                 );
             }
             catch (Exception ex)

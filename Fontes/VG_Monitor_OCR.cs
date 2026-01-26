@@ -4,13 +4,13 @@ using System.Windows.Forms; // Resolve erros de Timer e Cursor
 
 namespace PeliculaOverlay // DEVE ser igual ao do OverlayManager
 {
-    public class ForeignTextMonitor
+    public class VG_Monitor_OCR
     {
         private System.Windows.Forms.Timer _mouseTimer;
         private Point _lastMousePosition;
         private int _secondsIdle = 0;
 
-        public ForeignTextMonitor()
+        public VG_Monitor_OCR()
         {
             _mouseTimer = new System.Windows.Forms.Timer();
             _mouseTimer.Interval = 100;
