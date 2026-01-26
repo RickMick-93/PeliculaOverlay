@@ -1,0 +1,5 @@
+texto corrigido do storage drawer
+C:\Users\rickm\AppData\Roaming\Minecraft Bedrock\premium_cache\resource_packs\aFXCuAoUZVk=\texts\pt_BR.lang
+
+textos traduzidos do minecraft
+C:\XboxGames\Minecraft for Windows\Content\data\resource_packs\oreui\texts
