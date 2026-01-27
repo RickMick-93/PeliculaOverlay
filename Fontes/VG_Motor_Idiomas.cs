@@ -1,268 +1,128 @@
 ﻿using System;
-using System.Globalization;
+using System.Collections.Generic;
 using System.IO;
-using System.Threading;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Text.Json;
 
-namespace PeliculaOverlay
+namespace VisionGlass.Fontes
 {
-    /// <summary>
-    /// Detecta e gerencia o idioma do sistema para uso no VisionGlass
-    /// </summary>
-    public static class VG_Motor_Idiomas
+    public class VG_Motor_Idiomas
     {
-        private static string _userLanguage = string.Empty;
-        private static readonly string _logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs", "visionglass.log");
+        // Memória para guardar as traduções e não pesar no PC
+        private Dictionary<string, string> dicionarioMemoria = new Dictionary<string, string>();
+        private string processoAtual = "";
+        private string idiomaSistema;
 
-        /// <summary>
-        /// Idioma nativo do usuário detectado do sistema Windows
-        /// </summary>
-        public static string UserLanguage => _userLanguage;
+        // Comandos para o Windows nos dizer qual programa está aberto
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
-        /// <summary>
-        /// Inicializa o detector de idioma silenciosamente
-        /// </summary>
-        public static void Initialize()
+        public VG_Motor_Idiomas()
+        {
+            // Identifica o idioma do seu Windows (ex: pt_br)
+            idiomaSistema = System.Globalization.CultureInfo.CurrentCulture.Name.ToLower().Replace("-", "_");
+        }
+
+        // Esta é a função que o Monitor vai chamar para traduzir
+        public string TraduzirTexto(string textoOriginal)
+        {
+            AtualizarContextoDeJogo();
+
+            // Tenta achar no dicionário do jogo primeiro
+            string busca = textoOriginal.Trim().ToLower();
+            if (dicionarioMemoria.ContainsKey(busca))
+            {
+                return dicionarioMemoria[busca];
+            }
+
+            // Se não for jogo ou não estiver no dicionário, retorna para tradução livre
+            return "[VG]: " + textoOriginal;
+        }
+
+        private void AtualizarContextoDeJogo()
+        {
+            string nomeProcesso = ObterNomeProcessoAtivo();
+
+            // Só carrega o dicionário se você mudar de jogo/janela
+            if (nomeProcesso != processoAtual)
+            {
+                processoAtual = nomeProcesso;
+                CarregarDicionarios(nomeProcesso);
+            }
+        }
+
+        private void CarregarDicionarios(string nomeProcesso)
+        {
+            dicionarioMemoria.Clear();
+
+            // Caminho para a pasta de dicionários que você criou
+            string pastaRaiz = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Dictionaries");
+            string pastaDoJogo = Path.Combine(pastaRaiz, nomeProcesso);
+
+            // Ajuste especial para identificar o Minecraft Java (javaw) ou Bedrock
+            if (nomeProcesso.ToLower().Contains("javaw"))
+                pastaDoJogo = Path.Combine(pastaRaiz, "Minecraft_Java");
+            else if (nomeProcesso.ToLower().Contains("minecraft"))
+                pastaDoJogo = Path.Combine(pastaRaiz, "Minecraft_Bedrock");
+
+            if (Directory.Exists(pastaDoJogo))
+            {
+                // Procura arquivos pt_br.json ou pt_br.lang
+                string[] arquivos = Directory.GetFiles(pastaDoJogo, idiomaSistema + ".*");
+
+                foreach (string arquivo in arquivos)
+                {
+                    if (arquivo.EndsWith(".json")) LerJson(arquivo);
+                    else if (arquivo.EndsWith(".lang")) LerLang(arquivo);
+                }
+            }
+        }
+
+        private void LerLang(string caminho)
+        {
+            foreach (string linha in File.ReadLines(caminho))
+            {
+                // Regra: ignora comentários e linhas vazias
+                if (string.IsNullOrWhiteSpace(linha) || linha.StartsWith("#")) continue;
+
+                int sinalIgual = linha.IndexOf('=');
+                if (sinalIgual > 0)
+                {
+                    string chave = linha.Substring(0, sinalIgual).Trim().ToLower();
+                    string valor = linha.Substring(sinalIgual + 1).Trim();
+                    dicionarioMemoria[chave] = valor;
+                }
+            }
+        }
+
+        private void LerJson(string caminho)
         {
             try
             {
-                // Criar diretório de logs se não existir
-                Directory.CreateDirectory(Path.GetDirectoryName(_logFilePath));
-
-                // Detectar idioma do sistema Windows
-                DetectSystemLanguage();
-
-                // Log silencioso (apenas arquivo)
-                Log($"VisionGlass iniciado. Idioma nativo detectado: {_userLanguage}");
-                Log($"Data/Hora: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-                Log($"Diretório: {AppDomain.CurrentDomain.BaseDirectory}");
+                string conteudo = File.ReadAllText(caminho);
+                var dados = JsonSerializer.Deserialize<Dictionary<string, string>>(conteudo);
+                if (dados != null)
+                {
+                    foreach (var item in dados)
+                        dicionarioMemoria[item.Key.ToLower()] = item.Value;
+                }
             }
-            catch (Exception ex)
-            {
-                Log($"Erro na inicialização do LanguageDetector: {ex.Message}");
-                // Fallback para inglês em caso de erro
-                _userLanguage = "en-US";
-            }
+            catch { /* Ignora erros de leitura */ }
         }
 
-        /// <summary>
-        /// Detecta o idioma do sistema Windows usando múltiplas fontes
-        /// </summary>
-        private static void DetectSystemLanguage()
+        private string ObterNomeProcessoAtivo()
         {
+            IntPtr handle = GetForegroundWindow();
+            uint pid;
+            GetWindowThreadProcessId(handle, out pid);
             try
             {
-                // Prioridade 1: CultureInfo do thread atual (mais preciso para Windows)
-                var currentCulture = CultureInfo.CurrentCulture;
-
-                // Prioridade 2: CultureInfo da UI (para aplicativos com UI específica)
-                var uiCulture = CultureInfo.CurrentUICulture;
-
-                // Prioridade 3: Idioma do sistema do Windows
-                var systemLanguage = CultureInfo.InstalledUICulture;
-
-                // Log para debugging
-                Log($"Cultura atual: {currentCulture.Name} ({currentCulture.EnglishName})");
-                Log($"Cultura UI: {uiCulture.Name} ({uiCulture.EnglishName})");
-                Log($"Cultura instalada: {systemLanguage.Name} ({systemLanguage.EnglishName})");
-
-                // Heurística: Preferir a cultura atual, mas verificar consistência
-                if (!string.IsNullOrEmpty(currentCulture.Name))
-                {
-                    _userLanguage = currentCulture.Name;
-                    Log($"Idioma selecionado (current culture): {_userLanguage}");
-                }
-                else if (!string.IsNullOrEmpty(uiCulture.Name))
-                {
-                    _userLanguage = uiCulture.Name;
-                    Log($"Idioma selecionado (UI culture): {_userLanguage}");
-                }
-                else
-                {
-                    _userLanguage = systemLanguage.Name;
-                    Log($"Idioma selecionado (installed culture): {_userLanguage}");
-                }
-
-                // Normalizar o código do idioma (ex: pt-BR, en-US, es-ES)
-                NormalizeLanguageCode();
+                return Process.GetProcessById((int)pid).ProcessName;
             }
-            catch (Exception ex)
-            {
-                Log($"Erro ao detectar idioma: {ex.Message}");
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Normaliza o código do idioma para formato padrão
-        /// </summary>
-        private static void NormalizeLanguageCode()
-        {
-            try
-            {
-                // Exemplos de normalização:
-                // "pt" -> "pt-BR" (assumindo Brasil como padrão para português)
-                // "en" -> "en-US" (assumindo US como padrão para inglês)
-                // "es" -> "es-ES" (assumindo Espanha como padrão para espanhol)
-
-                if (_userLanguage.Length == 2) // Apenas código de idioma (ex: "pt", "en")
-                {
-                    switch (_userLanguage.ToLower())
-                    {
-                        case "pt":
-                            _userLanguage = "pt-BR";
-                            Log($"Idioma normalizado: {_userLanguage}");
-                            break;
-                        case "en":
-                            _userLanguage = "en-US";
-                            Log($"Idioma normalizado: {_userLanguage}");
-                            break;
-                        case "es":
-                            _userLanguage = "es-ES";
-                            Log($"Idioma normalizado: {_userLanguage}");
-                            break;
-                        case "fr":
-                            _userLanguage = "fr-FR";
-                            Log($"Idioma normalizado: {_userLanguage}");
-                            break;
-                        case "de":
-                            _userLanguage = "de-DE";
-                            Log($"Idioma normalizado: {_userLanguage}");
-                            break;
-                        case "it":
-                            _userLanguage = "it-IT";
-                            Log($"Idioma normalizado: {_userLanguage}");
-                            break;
-                        case "ja":
-                            _userLanguage = "ja-JP";
-                            Log($"Idioma normalizado: {_userLanguage}");
-                            break;
-                        case "ko":
-                            _userLanguage = "ko-KR";
-                            Log($"Idioma normalizado: {_userLanguage}");
-                            break;
-                        case "zh":
-                            _userLanguage = "zh-CN";
-                            Log($"Idioma normalizado: {_userLanguage}");
-                            break;
-                        case "ru":
-                            _userLanguage = "ru-RU";
-                            Log($"Idioma normalizado: {_userLanguage}");
-                            break;
-                            // Adicionar mais casos conforme necessário
-                    }
-                }
-                else if (_userLanguage.Length > 2 && !_userLanguage.Contains("-"))
-                {
-                    // Formato inválido, tentar corrigir
-                    var langCode = _userLanguage.Substring(0, 2).ToLower();
-                    NormalizeLanguageCode(); // Recursão com código de 2 letras
-                }
-
-                Log($"Idioma final normalizado: {_userLanguage}");
-            }
-            catch (Exception ex)
-            {
-                Log($"Erro ao normalizar código de idioma: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Verifica se um idioma é diferente do idioma nativo do usuário
-        /// </summary>
-        /// <param name="detectedLanguage">Idioma detectado no texto</param>
-        /// <returns>True se for um idioma estrangeiro</returns>
-        public static bool IsForeignLanguage(string detectedLanguage)
-        {
-            if (string.IsNullOrEmpty(detectedLanguage) || string.IsNullOrEmpty(_userLanguage))
-                return false;
-
-            try
-            {
-                // Comparar códigos de idioma principal (ex: "pt" em "pt-BR")
-                var userMainLang = _userLanguage.Split('-')[0].ToLower();
-                var detectedMainLang = detectedLanguage.Split('-')[0].ToLower();
-
-                bool isForeign = userMainLang != detectedMainLang;
-
-                Log($"Comparação de idiomas: Usuário={_userLanguage}, Detectado={detectedLanguage}, É estrangeiro={isForeign}");
-
-                return isForeign;
-            }
-            catch (Exception ex)
-            {
-                Log($"Erro ao comparar idiomas: {ex.Message}");
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Obtém o código do idioma principal (sem região)
-        /// </summary>
-        public static string GetMainLanguageCode()
-        {
-            if (string.IsNullOrEmpty(_userLanguage))
-                return string.Empty;
-
-            var parts = _userLanguage.Split('-');
-            return parts.Length > 0 ? parts[0].ToLower() : _userLanguage.ToLower();
-        }
-
-        /// <summary>
-        /// Obtém o código da região (se disponível)
-        /// </summary>
-        public static string GetRegionCode()
-        {
-            if (string.IsNullOrEmpty(_userLanguage))
-                return string.Empty;
-
-            var parts = _userLanguage.Split('-');
-            return parts.Length > 1 ? parts[1].ToUpper() : string.Empty;
-        }
-
-        /// <summary>
-        /// Log silencioso em arquivo (não mostra console)
-        /// </summary>
-        private static void Log(string message)
-        {
-            try
-            {
-                string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {message}";
-                File.AppendAllText(_logFilePath, logMessage + Environment.NewLine);
-            }
-            catch
-            {
-                // Silenciosamente ignora erros de log
-            }
-        }
-
-        /// <summary>
-        /// Limpa logs antigos (mantém apenas últimos 7 dias)
-        /// </summary>
-        public static void CleanOldLogs(int daysToKeep = 7)
-        {
-            try
-            {
-                var logDir = Path.GetDirectoryName(_logFilePath);
-                if (!Directory.Exists(logDir))
-                    return;
-
-                var cutoffDate = DateTime.Now.AddDays(-daysToKeep);
-                var logFiles = Directory.GetFiles(logDir, "*.log");
-
-                foreach (var file in logFiles)
-                {
-                    var fileInfo = new FileInfo(file);
-                    if (fileInfo.LastWriteTime < cutoffDate)
-                    {
-                        File.Delete(file);
-                        Log($"Log antigo removido: {file}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log($"Erro ao limpar logs antigos: {ex.Message}");
-            }
+            catch { return ""; }
         }
     }
 }
