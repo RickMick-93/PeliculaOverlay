@@ -1,56 +1,89 @@
 ﻿using System;
-using System.Drawing; // Resolve erros de Point e Rectangle
-using System.Windows.Forms; // Resolve erros de Timer e Cursor
+using System.Drawing;
+using System.Windows.Forms;
+using System.Runtime.InteropServices;
+using VisionGlass.Fontes;
 
-namespace PeliculaOverlay // DEVE ser igual ao do OverlayManager
+namespace VisionGlass.Monitores
 {
     public class VG_Monitor_OCR
     {
-        private System.Windows.Forms.Timer _mouseTimer;
-        private Point _lastMousePosition;
-        private int _secondsIdle = 0;
+        // Correção do erro CS0104: Especificando que é o Timer do Windows Forms
+        private System.Windows.Forms.Timer timerSistema;
+        private Point ultimaPosicaoMouse;
+        private Bitmap? ultimaCapturaTela; // Interrogação corrige o aviso CS8618
+        private VG_Motor_Idiomas motorTradutor;
+        private bool aguardandoMudancaDeTela = false;
 
         public VG_Monitor_OCR()
         {
-            _mouseTimer = new System.Windows.Forms.Timer();
-            _mouseTimer.Interval = 100;
-            _mouseTimer.Tick += MouseTimer_Tick;
-            _mouseTimer.Start();
+            motorTradutor = new VG_Motor_Idiomas();
+            timerSistema = new System.Windows.Forms.Timer();
+            timerSistema.Interval = 1000; // 1 segundo
+            timerSistema.Tick += GerenciadorCiclo;
+            timerSistema.Start();
         }
 
-        private void MouseTimer_Tick(object sender, EventArgs e)
+        private void GerenciadorCiclo(object sender, EventArgs e)
         {
-            Point currentPosition = Cursor.Position;
+            Bitmap telaAtual = CapturarMiniaturaTela();
+            bool telaMudou = VerificarSeTelaMudou(telaAtual);
 
-            if (currentPosition != _lastMousePosition)
+            if (telaMudou)
             {
-                // Se moveu o mouse, reseta tudo e "limpa" a tela se necessário
-                _lastMousePosition = currentPosition;
-                _secondsIdle = 0;
+                // Se a tela mudou (ex: rolou o menu), o VG volta a vigiar o mouse
+                aguardandoMudancaDeTela = false;
+                ultimaCapturaTela = telaAtual;
             }
-            else
-            {
-                // Se está parado, aumenta o tempo
-                _secondsIdle += 100;
 
-                // Quando atingir EXATAMENTE 1 segundo
-                if (_secondsIdle == 1000)
+            // Se já traduzimos esta tela, ignoramos o mouse completamente
+            if (aguardandoMudancaDeTela) return;
+
+            Point posicaoMouseAgora = Cursor.Position;
+
+            // Se o mouse parou por 1 segundo
+            if (posicaoMouseAgora == ultimaPosicaoMouse)
+            {
+                ExecutarVarreduraETraducao();
+                // REGRA: Após traduzir, o VG para de vigiar o mouse até a tela mudar
+                aguardandoMudancaDeTela = true;
+            }
+
+            ultimaPosicaoMouse = posicaoMouseAgora;
+        }
+
+        private void ExecutarVarreduraETraducao()
+        {
+            // O comando para o OCR e para desenhar a película virá aqui
+            // Por enquanto, aciona o motor de idiomas
+            string resultado = motorTradutor.TraduzirTexto("Texto Detectado");
+            Console.WriteLine("VG: " + resultado);
+        }
+
+        private bool VerificarSeTelaMudou(Bitmap novaTela)
+        {
+            if (ultimaCapturaTela == null) return true;
+
+            for (int x = 0; x < novaTela.Width; x++)
+            {
+                for (int y = 0; y < novaTela.Height; y++)
                 {
-                    IniciarCapturaDeTexto();
+                    if (novaTela.GetPixel(x, y) != ultimaCapturaTela.GetPixel(x, y))
+                        return true;
                 }
-
-                // Opcional: Aqui poderíamos colocar uma regra para 
-                // re-verificar a cada 5 segundos se o mouse continuar parado
             }
+            return false;
         }
 
-        private void IniciarCapturaDeTexto()
+        private Bitmap CapturarMiniaturaTela()
         {
-            // Isso faz o aviso pular na tela
-            MessageBox.Show("🎯 O VisionGlass detectou que o mouse parou! O sensor está funcionando.", "Teste de Sensor");
-
-            // Zera o tempo para não repetir o aviso sem parar
-            _secondsIdle = 0;
+            Bitmap bmp = new Bitmap(10, 10);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                // Captura uma amostra da tela para detecção de movimento/rolagem
+                g.CopyFromScreen(0, 0, 0, 0, bmp.Size);
+            }
+            return bmp;
         }
-    } // Esta chave fecha a Classe
-} // Esta chave fecha o Namespace
+    }
+}
