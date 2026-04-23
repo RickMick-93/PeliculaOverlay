@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +17,14 @@
   <ItemGroup>
     <EmbeddedResource Remove="Form1.resx" />
     <EmbeddedResource Remove="TransparentWindow.resx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="VisionGlass-Project\02-VG_MAPA_GERAL.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include=".github\copilot-instructions.md" />
   </ItemGroup>
 
 </Project>

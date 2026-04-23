@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
 using System.Drawing;
 
-namespace PeliculaOverlay
+namespace VisionGlass
 {
     /// <summary>
     /// Janela "vidro" transparente que serve como base para o overlay.
@@ -15,11 +15,14 @@ namespace PeliculaOverlay
     public class VG_Interface_Pelicula : Form
     {
         // Constantes fixas (não configuráveis)
-        private const byte FIXED_ALPHA = 15;        // 6% visível
+        private const byte FIXED_ALPHA = 38;       // ~15% visibilidade (vidro fantasma original)
         private const string WINDOW_TITLE = "Pelicula Overlay - Vidro Base";
 
         // Propriedade apenas para leitura (valor fixo)
         public int CurrentAlpha { get; } = FIXED_ALPHA;
+
+        private System.Collections.Generic.List<VG_Texto_Traduzido> listaTraducoes = new System.Collections.Generic.List<VG_Texto_Traduzido>();
+        private object lockTraducoes = new object();
 
         public VG_Interface_Pelicula()
         {
@@ -42,9 +45,24 @@ namespace PeliculaOverlay
             Console.WriteLine($"   Tamanho do vidro: {screen.Bounds.Width}x{screen.Bounds.Height}");
 
             // Configurações de cor/transparência
-            this.BackColor = Color.Black;
-            this.TransparencyKey = Color.Black;
-            this.Opacity = 0.01; // Valor mínimo para existir
+            this.BackColor = Color.Magenta; // Magenta será nossa cor de "vidro" invisível
+            this.TransparencyKey = Color.Magenta;
+            this.Opacity = 1.0; 
+        }
+
+        private Action? callbackPanico;
+        public void EscutarTeclaPanico(Action acao)
+        {
+            callbackPanico = acao;
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == VG_Sistema_Win32.WM_HOTKEY && (int)m.WParam == 9010) // 9010 = HOTKEY_ID
+            {
+                callbackPanico?.Invoke();
+            }
+            base.WndProc(ref m);
         }
 
         /// <summary>
@@ -98,12 +116,11 @@ namespace PeliculaOverlay
 
             try
             {
-                // Aplica alpha fixo via Windows API
                 VG_Sistema_Win32.SetLayeredWindowAttributes(
                     this.Handle,
-                    0,              // ColorKey (0 = não usamos)
-                    FIXED_ALPHA,    // Alpha fixo: 15
-                    VG_Sistema_Win32.LWA_ALPHA
+                    (uint)ColorTranslator.ToWin32(Color.Magenta), 
+                    FIXED_ALPHA,
+                    VG_Sistema_Win32.LWA_COLORKEY | VG_Sistema_Win32.LWA_ALPHA
                 );
             }
             catch (Exception ex)
@@ -134,13 +151,53 @@ namespace PeliculaOverlay
         }
 
         /// <summary>
-        /// Não pinta nada - a janela é completamente transparente
+        /// Atualiza a lista de textos a serem desenhados e força o redesenho.
         /// </summary>
+        public void AtualizarTraducoes(System.Collections.Generic.List<VG_Texto_Traduzido> novasTraducoes)
+        {
+            Console.WriteLine($"VG [DEBUG]: Recebidas {novasTraducoes.Count} traduções para desenhar.");
+            lock (lockTraducoes)
+            {
+                listaTraducoes = novasTraducoes;
+            }
+            
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => this.Invalidate()));
+            }
+            else
+            {
+                this.Invalidate();
+            }
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
-            // Base transparente - não desenha nada
-            // Futuramente: aqui desenharemos tarjas de tradução
             base.OnPaint(e);
+            Graphics g = e.Graphics;
+            
+            lock (lockTraducoes)
+            {
+                // OCR DESENHO: No modo Alpha Global (15-38), magenta fica 100% invisível
+                // Não desenhamos fundo manual para não gerar blend roxo.
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+
+                foreach (var item in listaTraducoes)
+                {
+                    DesenharGrifoAmarelo(g, item);
+                }
+            }
+        }
+
+        private void DesenharGrifoAmarelo(Graphics g, VG_Texto_Traduzido item)
+        {
+            // O grifo deve ser uma linha amarela abaixo da palavra
+            // Usamos a base do retângulo da região detectada
+            using (Pen penAmarela = new Pen(Color.Yellow, 2)) // Linha de 2px de espessura
+            {
+                int yBase = item.Regiao.Bottom - 1; 
+                g.DrawLine(penAmarela, item.Regiao.Left, yBase, item.Regiao.Right, yBase);
+            }
         }
 
         /// <summary>
@@ -148,8 +205,9 @@ namespace PeliculaOverlay
         /// </summary>
         protected override void OnPaintBackground(PaintEventArgs e)
         {
-            // Não pinta fundo - completamente transparente
-            e.Graphics.Clear(Color.Transparent);
+            // Pinta de Magenta para que a TransparencyKey torne isso invisível
+            // Mas o que desenharmos no OnPaint será 100% visível
+            e.Graphics.Clear(Color.Magenta);
         }
 
         // MÉTODOS OBSOLETOS - REMOVER NO FUTURO

@@ -1,16 +1,16 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
-using PeliculaOverlay;
 using Timer = System.Windows.Forms.Timer;
 
-namespace PeliculaOverlay
+namespace VisionGlass
 {
     public class VG_Gerenciador_Geral : IDisposable
     {
-        private VG_Interface_Pelicula glassWindow;
-        private VG_Interface_Borda borderWindow;
+        private VG_Interface_Pelicula? glassWindow;
+        private VG_Interface_Borda? borderWindow;
         private VG_Monitor_OCR _textMonitor;
-        private Timer zOrderTimer;
+        private Timer? zOrderTimer;
+        private const int HOTKEY_ID = 9010;
 
         public VG_Gerenciador_Geral()
         {
@@ -28,6 +28,30 @@ namespace PeliculaOverlay
                 Console.WriteLine("   Criando janela vidro...");
                 glassWindow = new VG_Interface_Pelicula();
                 glassWindow.Show();
+                
+                // Conectar o monitor à janela para que ele possa enviar as traduções
+                _textMonitor.ConectarInterface(glassWindow);
+                _textMonitor.DefinirBorda(borderWindow); // Nova conexão
+
+                // --- NOVO: REGISTRAR TECLA DE PÂNICO (Ctrl + Shift + X) ---
+                bool hotkeyRegistrado = VG_Sistema_Win32.RegisterHotKey(
+                    glassWindow.Handle, 
+                    HOTKEY_ID, 
+                    VG_Sistema_Win32.MOD_CONTROL | VG_Sistema_Win32.MOD_SHIFT, 
+                    VG_Sistema_Win32.VK_X
+                );
+                
+                if (hotkeyRegistrado)
+                {
+                    Console.WriteLine("   ✅ Tecla de PÂNICO (Ctrl+Shift+X) registrada.");
+                    // Sobrescrever o WNDPROC da janela para capturar o hotkey
+                    glassWindow.EscutarTeclaPanico(ProcessarTeclaPanico);
+                }
+                else
+                {
+                    Console.WriteLine("   ⚠️ Falha ao registrar Ctrl+Shift+X como pânico.");
+                }
+                
                 Console.WriteLine("   ✅ Vidro transparente ativo (alpha=15)");
 
                 // 2. JANELA DE BORDAS VISUAIS
@@ -92,6 +116,13 @@ namespace PeliculaOverlay
                 // Log silencioso - não interrompe o funcionamento
                 Console.WriteLine($"[DEBUG] Manutenção de Z-order: {ex.Message}");
             }
+        }
+
+        private void ProcessarTeclaPanico()
+        {
+            Console.WriteLine("\n🚨 PÂNICO DETECTADO! Encerrando VisionGlass IMEDIATAMENTE...");
+            // Usamos Environment.Exit(0) para garantir que tudo morra na hora
+            Environment.Exit(0);
         }
 
         public void Stop()

@@ -2,7 +2,7 @@
 using System.Windows.Forms;
 using System.Drawing;
 
-namespace PeliculaOverlay
+namespace VisionGlass
 {
     /// <summary>
     /// Janela que desenha bordas visuais ciano ao redor da tela.

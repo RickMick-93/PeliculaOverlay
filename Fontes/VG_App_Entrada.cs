@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace PeliculaOverlay
+namespace VisionGlass
 {
     internal static class VG_App_Entrada
     {
@@ -12,23 +12,16 @@ namespace PeliculaOverlay
 
             try
             {
-                // --- PASSO 1: DETECTAR IDIOMA DO SISTEMA ---
-                VG_Motor_Idiomas.Initialize();
-                VG_Motor_Idiomas.CleanOldLogs();
+                // --- PASSO 1: INICIAR O GERENCIADOR GERAL ---
+                // O Gerenciador se encarrega de criar o Vidro, as Bordas e o Monitor OCR
+                var gerenciador = new VG_Gerenciador_Geral();
+                gerenciador.Start();
 
-                // --- PASSO 2: INICIAR O VIGIA DO MOUSE ---
-                // Adicionamos esta linha para o sensor começar a contar o tempo de repouso
-                var monitor = new VG_Monitor_OCR();
-
-                // --- PASSO 3: INICIAR OVERLAY BASE ---
-                var overlay = new VG_Gerenciador_Geral();
-                overlay.Start();
-
-                // --- PASSO 4: MANTER APLICAÇÃO RODANDO ---
+                // --- PASSO 2: MANTER APLICAÇÃO RODANDO ---
                 Application.Run();
 
-                // --- PASSO 5: LIMPEZA AO FECHAR ---
-                overlay.Stop();
+                // --- PASSO 3: LIMPEZA AO FECHAR ---
+                gerenciador.Stop();
             }
             catch (Exception)
             {
